@@ -8,7 +8,7 @@
 <body>
   <canvas id="canvasId"></canvas>
   <script>
-    const field_vertical = 10  //縦
+    const field_vertical = 20  //縦
     const field_beside = 10 //横
     const block_size = 30
     const tetro_size = 4
@@ -29,7 +29,6 @@
         [0, 1, 0, 0],
         [0, 0, 0, 0],
       ],
-
       //テトロL
       [
         [0, 1, 0, 0],
@@ -39,37 +38,73 @@
       ]
     ]
 
+    //テトロミノの座標
+    let tetro_x = 0
+    let tetro_y = 0
+    
+    const drawBlock = (x,y) => {
+      let px = x * block_size
+      let py = y * block_size
+      conText.fillStyle = 'red'
+      conText.fillRect(px, py, block_size, block_size)
+      conText.strokeStyle = 'black'
+      conText.strokeRect(px, py, block_size, block_size)
+    }
     const randomIndex = Math.floor(Math.random() * 2)
     const makeTetroMino = () => {
-    for (let y = 0; y < tetro_size; y++) {
-      for (let x = 0; x < tetro_size; x++) {
-        if (tetros[randomIndex][y][x]) {
-          let px = x * block_size
-          let py = y * block_size
-          conText.fillStyle = 'red'
-          conText.fillRect(px, py, block_size, block_size)
-          conText.strokeStyle = 'black'
-          conText.strokeRect(px, py, block_size, block_size)
+      conText.clearRect(0,0, canvas_beside, canvas_vertical)
+      for (let y = 0; y < tetro_size; y++) {
+        for (let x = 0; x < tetro_size; x++) {
+          if (tetros[randomIndex][y][x]) {
+            drawBlock(tetro_x+x,tetro_y+y)
+          }
         }
       }
-    }
   }
+    
+    let field = []
+    for(let row = 0; row < field_vertical; row++){
+      field[row] = []
+      for(let col = 0; col < field_beside; col++){
+        field[row][col] = 0
+      }
+    }
+    const makeField = () => {
+      for(let row = 0; row < field_vertical; row++){
+        for(let col = 0; col < field_beside; col++){
+          if (field[row][col]) {
+            drawBlock(col,row)
+          }
+        }
+      } 
+    }
+
+    makeField()
     makeTetroMino()
+    
 
     //テトロミノの移動
-    document.onkeydown((e) => {
+    document.addEventListener('keydown',(e)=>{
       switch(e.keyCode){
-        //左 37
-        //右 39
-        //下 40
-        //スペース 32
-        //シフトキー 16
+        case 37 : //左
+        tetro_x--
+        makeTetroMino()
+        break
+        case 38: //上
+        tetro_y--
+        makeTetroMino()
+        break
+        case 39 : //右
+        tetro_x++
+        makeTetroMino()
+        break
+        case 40 :  //下
+        tetro_y++
+        makeTetroMino()
+        break
       }
     })
   
-  
-
- 
   
   </script>
 </script>
