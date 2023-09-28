@@ -3,7 +3,6 @@
   const field_vertical = 21 //縦方向にブロックを格納できる個数
   const field_beside = 12 //横方向にブロックを格納できる個数
   const block_size = 30
-  const tetro_size = 4 //1テトロは4*4のマスで構成されている
   const canvas_vertical = field_vertical * block_size //ボードの縦方向の長さ
   const canvas_beside = field_beside * block_size //ボードの横方向の長さ
 
@@ -146,7 +145,6 @@
   }
   const board = new Board()
   board.init()
-  updateTetroMinoPosition()
 
   const testButton = document.createElement("button")
   testButton.textContent = "Add Tetris"
