@@ -92,7 +92,7 @@
     }
     putBlock(x, y) {
       //下方向に移動できないとき、fieldの座標を埋める
-      //field.tiles[y][x] = 1
+      this.tiles[y][x] = 1
     }
   }
 
@@ -122,12 +122,6 @@
               this.tetroMino.x--
             }
             break
-          case 38: //上
-            copy.y--
-            if (this.checkMove(copy, this.field) == true) {
-              this.tetroMino.y--
-            }
-            break
           case 39: //右
             copy.x++
             if (this.checkMove(copy, this.field) == true) {
@@ -138,10 +132,11 @@
             copy.y++
             if (this.checkMove(copy, this.field) == true) {
               this.tetroMino.y++
+            } else {
+              this.tetroMino.getBlocks().forEach((block) => {
+                this.field.putBlock(block.x, block.y)
+              })
             }
-            //else {//底についた条件を書いて、条件を満たすときに
-            //filed.putBlock(ブロックスのブロックのx座標,ブロックスのブロックのy座標)
-            // }
             break
         }
         this.tetroMino.draw()
@@ -155,20 +150,34 @@
       this.y = y
     }
   }
-  let intervalID
-  const updateTetroMinoPosition = () => {
-    intervalID = setInterval(() => {
-      const m = board.tetroMino.copy()
-    }, 1000)
-  }
+
   const board = new Board()
   board.init()
+
+  const updateTetroMinoPosition = () => {
+    let intervalID
+    intervalID = setInterval(() => {
+      const m = board.tetroMino.copy()
+      conText.clearRect(0, 0, canvas_beside, canvas_vertical)
+      board.field.draw()
+      if (board.checkMove(m, board.field) == true) {
+        board.tetroMino.y++
+      } else {
+        clearInterval(intervalID)
+        board.tetroMino.getBlocks().forEach((block) => {
+          board.field.putBlock(block.x, block.y)
+        })
+      }
+      board.tetroMino.draw()
+    }, 1000)
+  }
 
   const testButton = document.createElement("button")
   testButton.textContent = "Add Tetris"
   document.querySelector("body").appendChild(testButton)
   testButton.addEventListener("click", () => {
-    const tetro = new Tetromino(5, 1)
-    tetro.draw()
+    board.tetroMino = new Tetromino(5, 1)
+    board.tetroMino.draw()
+    updateTetroMinoPosition()
   })
 }
