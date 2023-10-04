@@ -25,8 +25,7 @@
     constructor(_x, _y) {
       this.x = _x
       this.y = _y
-      // this. tetroType = Math.floor(Math.random() * 2)
-      this.tetroType = 1
+      this.tetroType = Math.floor(Math.random() * 2)
     }
     draw() {
       for (let block of this.getBlocks()) {
@@ -38,12 +37,10 @@
     }
     getBlocks() {
       let blocks = [
-        new Block(-1, 0),
-        new Block(0, 0),
-        new Block(0, -1),
-        new Block(1, 0),
+        [new Block(-1, 0), new Block(0, 0), new Block(0, -1), new Block(1, 0)],
+        [new Block(0, 0), new Block(1, 0), new Block(0, -1), new Block(0, -2)],
       ]
-      return blocks.map((block) => {
+      return blocks[this.tetroType].map((block) => {
         return new Block(this.x + block.x, this.y + block.y)
       })
     }
@@ -98,13 +95,38 @@
 
   class Board {
     constructor() {
-      this.field = new Field()
-      this.field.draw()
-      this.tetroMino = new Tetromino(5, 1)
+      this.tetroMino = new Tetromino(5, 3)
+      this.intervalID
+      this.gameOver = false
     }
     init() {
+      this.field = new Field()
+      this.field.draw()
       this.tetroMino.draw()
       this.moveTetroMino()
+      this.gameOver = false
+      this.intervalID = setInterval(() => {
+        const m = this.tetroMino.copy()
+        m.y++
+        conText.clearRect(0, 0, canvas_beside, canvas_vertical)
+        this.field.draw()
+        if (this.checkMove(m, this.field) == true) {
+          this.tetroMino.y++
+        } else {
+          this.tetroMino.getBlocks().forEach((block) => {
+            this.field.putBlock(block.x, block.y)
+            this.field.draw()
+          })
+          this.tetroMino = new Tetromino(6, 3)
+          this.tetroMino.draw()
+          if (this.checkMove(this.tetroMino, this.field) == false) {
+            this.gameOver = true
+            clearInterval(this.intervalID)
+            confirm("Game Over")
+          }
+        }
+        this.tetroMino.draw()
+      }, 1000)
     }
     checkMove(copy, field) {
       const blocks = copy.getBlocks()
@@ -122,6 +144,12 @@
               this.tetroMino.x--
             }
             break
+          case 38:
+            if (this.gameOver !== true) {
+              return
+            }
+            this.init()
+            break
           case 39: //右
             copy.x++
             if (this.checkMove(copy, this.field) == true) {
@@ -135,7 +163,15 @@
             } else {
               this.tetroMino.getBlocks().forEach((block) => {
                 this.field.putBlock(block.x, block.y)
+                this.field.draw()
               })
+              this.tetroMino = new Tetromino(6, 3)
+              this.tetroMino.draw()
+              if (this.checkMove(this.tetroMino, this.field) == false) {
+                this.gameOver = true
+                clearInterval(this.intervalID)
+                confirm("Game Over")
+              }
             }
             break
         }
@@ -153,31 +189,4 @@
 
   const board = new Board()
   board.init()
-
-  const updateTetroMinoPosition = () => {
-    let intervalID
-    intervalID = setInterval(() => {
-      const m = board.tetroMino.copy()
-      conText.clearRect(0, 0, canvas_beside, canvas_vertical)
-      board.field.draw()
-      if (board.checkMove(m, board.field) == true) {
-        board.tetroMino.y++
-      } else {
-        clearInterval(intervalID)
-        board.tetroMino.getBlocks().forEach((block) => {
-          board.field.putBlock(block.x, block.y)
-        })
-      }
-      board.tetroMino.draw()
-    }, 1000)
-  }
-
-  const testButton = document.createElement("button")
-  testButton.textContent = "Add Tetris"
-  document.querySelector("body").appendChild(testButton)
-  testButton.addEventListener("click", () => {
-    board.tetroMino = new Tetromino(5, 1)
-    board.tetroMino.draw()
-    updateTetroMinoPosition()
-  })
 }
