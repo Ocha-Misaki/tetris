@@ -33,7 +33,6 @@
         drawBlock(block.x, block.y)
       }
     }
-
     copy() {
       return new Tetromino(this.x, this.y)
     }
@@ -91,6 +90,10 @@
       }
       return this.tiles[y][x]
     }
+    putBlock(x, y) {
+      //下方向に移動できないとき、fieldの座標を埋める
+      //field.tiles[y][x] = 1
+    }
   }
 
   class Board {
@@ -103,30 +106,45 @@
       this.tetroMino.draw()
       this.moveTetroMino()
     }
+    checkMove(copy, field) {
+      const blocks = copy.getBlocks()
+      return blocks.every((block) => field.tileAt(block.x, block.y) == 0)
+    }
     moveTetroMino() {
       document.addEventListener("keydown", (e) => {
         conText.clearRect(0, 0, canvas_beside, canvas_vertical)
         this.field.draw()
+        const copy = this.tetroMino.copy()
         switch (e.keyCode) {
           case 37: //左
-            this.tetroMino.x--
-
-            this.tetroMino.draw()
+            copy.x--
+            if (this.checkMove(copy, this.field) == true) {
+              this.tetroMino.x--
+            }
             break
           case 38: //上
-            this.tetroMino.y--
-            this.tetroMino.draw()
+            copy.y--
+            if (this.checkMove(copy, this.field) == true) {
+              this.tetroMino.y--
+            }
             break
           case 39: //右
-            this.tetroMino.x++
-            this.tetroMino.draw()
+            copy.x++
+            if (this.checkMove(copy, this.field) == true) {
+              this.tetroMino.x++
+            }
             break
           case 40: //下
-            this.tetroMino.y++
-
-            this.tetroMino.draw()
+            copy.y++
+            if (this.checkMove(copy, this.field) == true) {
+              this.tetroMino.y++
+            }
+            //else {//底についた条件を書いて、条件を満たすときに
+            //filed.putBlock(ブロックスのブロックのx座標,ブロックスのブロックのy座標)
+            // }
             break
         }
+        this.tetroMino.draw()
       })
     }
   }
