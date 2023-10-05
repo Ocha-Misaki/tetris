@@ -22,10 +22,10 @@
   }
 
   class Tetromino {
-    constructor(_x, _y) {
+    constructor(_x, _y, _tetroType) {
       this.x = _x
       this.y = _y
-      this.tetroType = Math.floor(Math.random() * 2)
+      this.tetroType = _tetroType
     }
     draw() {
       for (let block of this.getBlocks()) {
@@ -33,7 +33,7 @@
       }
     }
     copy() {
-      return new Tetromino(this.x, this.y)
+      return new Tetromino(this.x, this.y, this.tetroType)
     }
     getBlocks() {
       let blocks = [
@@ -51,9 +51,9 @@
       this.tiles = [
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -91,11 +91,25 @@
       //下方向に移動できないとき、fieldの座標を埋める
       this.tiles[y][x] = 1
     }
+    findLineFilled() {
+      for (let i = 0; i < 20; i++) {
+        if (this.tiles[i].every((tile) => tile == 1) == true) {
+          return i
+        }
+      }
+      return -1
+    }
+    cutLine(y) {
+      if (y == -1) {
+        return
+      }
+      this.tiles.splice(y, 1, [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+    }
   }
 
   class Board {
     constructor() {
-      this.tetroMino = new Tetromino(5, 3)
+      this.tetroMino = new Tetromino(6, 3, Math.floor(Math.random() * 2))
       this.intervalID
       this.gameOver = false
     }
@@ -105,19 +119,22 @@
       this.tetroMino.draw()
       this.moveTetroMino()
       this.gameOver = false
+
       this.intervalID = setInterval(() => {
-        const m = this.tetroMino.copy()
-        m.y++
+        const futureMino = this.tetroMino.copy()
+        futureMino.y++
         conText.clearRect(0, 0, canvas_beside, canvas_vertical)
         this.field.draw()
-        if (this.checkMove(m, this.field) == true) {
+        if (this.checkMove(futureMino, this.field) == true) {
           this.tetroMino.y++
         } else {
           this.tetroMino.getBlocks().forEach((block) => {
             this.field.putBlock(block.x, block.y)
-            this.field.draw()
           })
-          this.tetroMino = new Tetromino(6, 3)
+          console.log(this.field.findLineFilled()) //-1
+          this.field.cutLine(this.field.findLineFilled())
+          this.field.draw()
+          this.tetroMino = new Tetromino(6, 3, Math.floor(Math.random() * 2))
           this.tetroMino.draw()
           if (this.checkMove(this.tetroMino, this.field) == false) {
             this.gameOver = true
@@ -128,19 +145,19 @@
         this.tetroMino.draw()
       }, 1000)
     }
-    checkMove(copy, field) {
-      const blocks = copy.getBlocks()
+    checkMove(tetro, field) {
+      const blocks = tetro.getBlocks()
       return blocks.every((block) => field.tileAt(block.x, block.y) == 0)
     }
     moveTetroMino() {
       document.addEventListener("keydown", (e) => {
         conText.clearRect(0, 0, canvas_beside, canvas_vertical)
         this.field.draw()
-        const copy = this.tetroMino.copy()
+        const futureMino = this.tetroMino.copy()
         switch (e.keyCode) {
           case 37: //左
-            copy.x--
-            if (this.checkMove(copy, this.field) == true) {
+            futureMino.x--
+            if (this.checkMove(futureMino, this.field) == true) {
               this.tetroMino.x--
             }
             break
@@ -151,21 +168,26 @@
             this.init()
             break
           case 39: //右
-            copy.x++
-            if (this.checkMove(copy, this.field) == true) {
+            futureMino.x++
+            if (this.checkMove(futureMino, this.field) == true) {
               this.tetroMino.x++
             }
             break
           case 40: //下
-            copy.y++
-            if (this.checkMove(copy, this.field) == true) {
+            futureMino.y++
+            if (this.checkMove(futureMino, this.field) == true) {
               this.tetroMino.y++
             } else {
               this.tetroMino.getBlocks().forEach((block) => {
                 this.field.putBlock(block.x, block.y)
-                this.field.draw()
               })
-              this.tetroMino = new Tetromino(6, 3)
+              this.field.cutLine(this.field.findLineFilled())
+              this.field.draw()
+              this.tetroMino = new Tetromino(
+                6,
+                3,
+                Math.floor(Math.random() * 2)
+              )
               this.tetroMino.draw()
               if (this.checkMove(this.tetroMino, this.field) == false) {
                 this.gameOver = true
