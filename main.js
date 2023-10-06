@@ -36,11 +36,20 @@
       return new Tetromino(this.x, this.y, this.tetroType)
     }
     getBlocks() {
-      let blocks = [
+      const BLOCKS = [
         [new Block(-1, 0), new Block(0, 0), new Block(0, -1), new Block(1, 0)],
         [new Block(0, 0), new Block(1, 0), new Block(0, -1), new Block(0, -2)],
       ]
-      return blocks[this.tetroType].map((block) => {
+      let blocks = BLOCKS[this.tetroType]
+      //回転処理
+      if (board.countUp >= 1) {
+        for (let i = 0; i < board.countUp; i++) {
+          blocks = blocks.map((block) => {
+            return new Block(-block.y, block.x)
+          })
+        }
+      }
+      return blocks.map((block) => {
         return new Block(this.x + block.x, this.y + block.y)
       })
     }
@@ -120,6 +129,7 @@
       this.tetroMino.draw()
       this.moveTetroMino()
       this.gameOver = false
+      this.countUp = 0
 
       this.intervalID = setInterval(() => {
         const futureMino = this.tetroMino.copy()
@@ -136,6 +146,7 @@
           while ((line = this.field.findLineFilled()) !== -1) {
             this.field.cutLine(line)
           }
+          this.countUp = 0
           this.field.draw()
           this.tetroMino = new Tetromino(6, 3, Math.floor(Math.random() * 2))
           this.tetroMino.draw()
@@ -192,6 +203,7 @@
                 Math.floor(Math.random() * 2)
               )
               this.tetroMino.draw()
+              this.countUp = 0
               if (this.checkMove(this.tetroMino, this.field) == false) {
                 this.gameOver = true
                 clearInterval(this.intervalID)
@@ -199,14 +211,9 @@
               }
             }
             break
+
           case 32: //スペースキー
-            //futureMinoに対して回転処理を加える
-            futureMino.x = futureMino.y
-            futureMino.y = 12 - futureMino.x
-            if (this.checkMove(futureMino, this.field) == true) {
-              this.tetroMino.x = this.tetroMino.y //ここも回転処理に変更する
-              this.tetroMino.y = 12 - this.tetroMino.x
-            }
+            this.countUp++
             break
         }
         this.tetroMino.draw()
