@@ -25,7 +25,7 @@
     constructor(_x, _y, _tetroType) {
       this.x = _x
       this.y = _y
-      this.tetroType = 0
+      this.tetroType = _tetroType
     }
     draw() {
       for (let block of this.getBlocks()) {
@@ -39,6 +39,9 @@
       const BLOCKS = [
         [new Block(-1, 0), new Block(0, 0), new Block(0, -1), new Block(1, 0)],
         [new Block(0, 0), new Block(1, 0), new Block(0, -1), new Block(0, -2)],
+        [new Block(0, 0), new Block(1, 0), new Block(0, -1), new Block(1, -1)],
+        [new Block(-2, 0), new Block(-1, 0), new Block(0, 0), new Block(1, 0)],
+        [new Block(0, 0), new Block(0, -1), new Block(1, 0), new Block(1, 1)],
       ]
       let blocks = BLOCKS[this.tetroType]
       //回転処理
@@ -119,7 +122,7 @@
 
   class Board {
     constructor() {
-      this.tetroMino = new Tetromino(6, 3, Math.floor(Math.random() * 2))
+      this.tetroMino = new Tetromino(6, 3, Math.floor(Math.random() * 5))
       this.intervalID
       this.gameOver = false
     }
@@ -148,8 +151,9 @@
           }
           this.countUp = 0
           this.field.draw()
-          this.tetroMino = new Tetromino(6, 3, Math.floor(Math.random() * 2))
+          this.tetroMino = new Tetromino(6, 3, Math.floor(Math.random() * 5))
           this.tetroMino.draw()
+          //ゲームオーバーの判定
           if (this.checkMove(this.tetroMino, this.field) == false) {
             this.gameOver = true
             clearInterval(this.intervalID)
@@ -200,10 +204,11 @@
               this.tetroMino = new Tetromino(
                 6,
                 3,
-                Math.floor(Math.random() * 2)
+                Math.floor(Math.random() * 5)
               )
               this.tetroMino.draw()
               this.countUp = 0
+              //ゲームオーバーの判定
               if (this.checkMove(this.tetroMino, this.field) == false) {
                 this.gameOver = true
                 clearInterval(this.intervalID)
