@@ -12,7 +12,7 @@
   canvasId.height = canvas_vertical
   canvasId.style.border = "4px solid #555"
 
-  const tetroColors = ["red", "blue", "green", "brown", "orange", "#FF367F"]
+  const tetroColors = ["", "red", "green", "brown", "orange", "#FF367F", "blue"]
 
   const drawBlock = (x, y, colorType) => {
     let px = x * block_size
@@ -32,7 +32,7 @@
     }
     draw() {
       for (let block of this.getBlocks()) {
-        drawBlock(block.x, block.y, this.tetroType + 1)
+        drawBlock(block.x, block.y, this.tetroType + 2)
       }
     }
     copy() {
@@ -162,7 +162,7 @@
       } else {
         //ブロックをフィールドに固定する
         this.tetroMino.getBlocks().forEach((block) => {
-          this.field.putBlock(block.x, block.y, this.tetroMino.tetroType + 1)
+          this.field.putBlock(block.x, block.y, this.tetroMino.tetroType + 2)
         })
         //ブロックが横一列に揃ったら、ラインを消す
         let line = -1
