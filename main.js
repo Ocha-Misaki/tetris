@@ -1,6 +1,6 @@
 "use strict"
 {
-  const field_vertical = 21 //縦方向にブロックを格納できる個数
+  const field_vertical = 22 //縦方向にブロックを格納できる個数
   const field_beside = 12 //横方向にブロックを格納できる個数
   const block_size = 30
   const canvas_vertical = field_vertical * block_size //ボードの縦方向の長さ
@@ -12,20 +12,12 @@
   canvasId.height = canvas_vertical
   canvasId.style.border = "4px solid #555"
 
-  const colors = [
-    "red",
-    "#FF1493",
-    "#FF69B4",
-    "#FF00FF",
-    "#C71585",
-    "#FF367F",
-    "#EE82EE",
-    "#CC0099",
-  ]
-  const drawBlock = (x, y, colorNum) => {
+  const tetroColors = ["red", "blue", "green", "brown", "orange", "#FF367F"]
+
+  const drawBlock = (x, y, colorType) => {
     let px = x * block_size
     let py = y * block_size
-    conText.fillStyle = colors[colorNum]
+    conText.fillStyle = tetroColors[colorType]
     conText.fillRect(px, py, block_size, block_size)
     conText.strokeStyle = "black"
     conText.strokeRect(px, py, block_size, block_size)
@@ -40,7 +32,7 @@
     }
     draw() {
       for (let block of this.getBlocks()) {
-        drawBlock(block.x, block.y, this.tetroType)
+        drawBlock(block.x, block.y, this.tetroType + 1)
       }
     }
     copy() {
@@ -48,10 +40,15 @@
     }
     getBlocks() {
       const BLOCKS = [
+        //T型
         [new Block(-1, 0), new Block(0, 0), new Block(0, -1), new Block(1, 0)],
+        //L型
         [new Block(0, 0), new Block(1, 0), new Block(0, -1), new Block(0, -2)],
+        //四角型
         [new Block(0, 0), new Block(1, 0), new Block(0, -1), new Block(1, -1)],
+        //I型
         [new Block(-2, 0), new Block(-1, 0), new Block(0, 0), new Block(1, 0)],
+        //Z型
         [new Block(0, 0), new Block(0, -1), new Block(1, 0), new Block(1, 1)],
       ]
       let blocks = BLOCKS[this.tetroType]
@@ -100,7 +97,7 @@
       for (let row = 0; row < field_vertical; row++) {
         for (let col = 0; col < field_beside; col++) {
           if (this.tiles[row][col]) {
-            drawBlock(col, row, 0)
+            drawBlock(col, row, this.tiles[row][col])
           }
         }
       }
@@ -111,13 +108,13 @@
       }
       return this.tiles[y][x]
     }
-    putBlock(x, y) {
+    putBlock(x, y, colorType) {
       //下方向に移動できないとき、fieldの座標を埋める
-      this.tiles[y][x] = 1
+      this.tiles[y][x] = colorType
     }
     findLineFilled() {
       for (let i = 0; i < field_vertical - 1; i++) {
-        if (this.tiles[i].every((tile) => tile == 1) == true) {
+        if (this.tiles[i].every((tile) => tile !== 0) == true) {
           return i
         }
       }
@@ -165,7 +162,7 @@
       } else {
         //ブロックをフィールドに固定する
         this.tetroMino.getBlocks().forEach((block) => {
-          this.field.putBlock(block.x, block.y)
+          this.field.putBlock(block.x, block.y, this.tetroMino.tetroType + 1)
         })
         //ブロックが横一列に揃ったら、ラインを消す
         let line = -1
@@ -189,7 +186,6 @@
         conText.clearRect(0, 0, canvas_beside, canvas_vertical)
         this.field.draw()
         const futureMino = this.tetroMino.copy()
-
         switch (e.keyCode) {
           case 37: //左
             futureMino.x--
