@@ -25,7 +25,7 @@
     constructor(_x, _y, _tetroType) {
       this.x = _x
       this.y = _y
-      this.tetroType = _tetroType
+      this.tetroType = 0
     }
     draw() {
       for (let block of this.getBlocks()) {
@@ -51,9 +51,9 @@
       this.tiles = [
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -103,7 +103,8 @@
       if (y == -1) {
         return
       }
-      this.tiles.splice(y, 1, [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+      this.tiles.splice(y, 1)
+      this.tiles.unshift([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
     }
   }
 
@@ -131,8 +132,10 @@
           this.tetroMino.getBlocks().forEach((block) => {
             this.field.putBlock(block.x, block.y)
           })
-          console.log(this.field.findLineFilled()) //-1
-          this.field.cutLine(this.field.findLineFilled())
+          let line = -1
+          while ((line = this.field.findLineFilled()) !== -1) {
+            this.field.cutLine(line)
+          }
           this.field.draw()
           this.tetroMino = new Tetromino(6, 3, Math.floor(Math.random() * 2))
           this.tetroMino.draw()
@@ -194,6 +197,15 @@
                 clearInterval(this.intervalID)
                 confirm("Game Over")
               }
+            }
+            break
+          case 32: //スペースキー
+            //futureMinoに対して回転処理を加える
+            futureMino.x = futureMino.y
+            futureMino.y = 12 - futureMino.x
+            if (this.checkMove(futureMino, this.field) == true) {
+              this.tetroMino.x = this.tetroMino.y //ここも回転処理に変更する
+              this.tetroMino.y = 12 - this.tetroMino.x
             }
             break
         }
